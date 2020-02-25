@@ -1,0 +1,171 @@
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 17:07:20 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: G:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          /***********************************************************
+   2          STC90C51RD+与HC-06蓝牙连线：
+   3                  蓝牙  STC90C51RD+
+   4                  RXD    TXD
+   5                  TXD    RXD
+   6          其他连线：
+   7                  P2.0、P2.1、P2.3分别接一个指示灯
+   8          
+   9          ！！！！
+  10          ！！！！注意：若单片机TXD（P3.1）无上拉能力，必须在P3.1端接上拉电阻。本次测试需要接上拉电阻
+  11          ！！！！
+  12          
+  13          手机采用蓝牙串口通信助手
+  14          最后已改用Android自编蓝牙通信软件
+  15                                                  By itas109
+  16          ***********************************************************/
+  17          #include <reg52.h>
+  18          #include <intrins.h>
+  19          #include <stdio.h>
+  20          
+  21          #define uchar unsigned char
+  22          #define uint unsigned int
+  23          
+  24          #define BAUD 9600L
+  25          #define FOSC 22118400L
+  26          #define CYCLE (12000000.0/FOSC) //周期 us  
+  27          
+  28          sbit Trig = P1 ^ 6;
+  29          sbit Echo = P1 ^ 7;
+  30          
+  31          
+  32          uint tmp;
+  33          uint c = 0;
+  34          
+  35          sbit led1 = P2 ^ 0;//指示灯0
+  36          sbit led2 = P2 ^ 1;//指示灯1
+  37          sbit led3 = P2 ^ 2;//指示灯2
+  38          
+  39          void uartInit();
+  40          void sendByte(uchar dat);
+  41          void writeString(char *str);
+  42          void sleep();
+  43          float getDist();
+  44          void ctrl();
+  45          
+  46          
+  47          void main() {
+  48   1              char buffer[16] = {0};
+  49   1              Trig = 0;
+  50   1              Echo = 1;
+  51   1              uartInit();
+  52   1              while (1) {
+  53   2                      if (RI == 1) {  // 是否有数据到来
+  54   3                              RI = 0;
+  55   3      
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 17:07:20 PAGE 2   
+
+  56   3                              sprintf(buffer, "%.2f cm\n", getDist());
+  57   3                              writeString(buffer);
+  58   3      
+  59   3                              tmp = SBUF;
+  60   3                              ctrl();
+  61   3                              sleep();
+  62   3                      }
+  63   2              }
+  64   1      }
+  65          
+  66          
+  67          void uartInit() {
+  68   1              TMOD = 0x20;        //定时器1用于串口
+  69   1              TH1 = TL1 = -(FOSC / 12 / 32 / BAUD); //设置装入初值
+  70   1              TR1 = 1;                            //启动定时器1
+  71   1              SM0 = 0;
+  72   1              SM1 = 1;                            //设置串口为方式一
+  73   1              REN = 1;                            //接收使能
+  74   1              ES = 1;                             //打开中断
+  75   1              EA = 1;
+  76   1      
+  77   1              //初始化设置3个指示灯全亮
+  78   1              led1 = 0;
+  79   1              led2 = 0;
+  80   1              led3 = 0;
+  81   1      }
+  82          
+  83          void sendByte(uchar dat) {
+  84   1              ES = 0;     //关闭中断
+  85   1              SBUF = dat; //写入数据
+  86   1              while (!TI); //等待数据发送结束
+  87   1              TI = 0;     //手动置0
+  88   1              ES = 1;     //打开中断
+  89   1      }
+  90          
+  91          void writeString(char *str) {
+  92   1              while (*str) {
+  93   2                      sendByte(*str);
+  94   2                      str++;
+  95   2              }
+  96   1      }
+  97          
+  98          void sleep() {
+  99   1              uchar i, j, k;
+ 100   1              for (i = 0; i < 255; i++)
+ 101   1                      for (j = 0; j < 255; j++)
+ 102   1                              for (k = 0; k < 16; k++);
+ 103   1      }
+ 104          
+ 105          float getDist() {
+ 106   1              uchar i = 100;
+ 107   1              float dist = 0.0f;
+ 108   1              uint count = 0;
+ 109   1      
+ 110   1              Trig = 1;       //打开触发
+ 111   1              while (i--);    //延时一会儿
+ 112   1              TMOD = 0x01;    //计时器0方式1
+ 113   1              TH0 = TL0 = 0;  //装入初值
+ 114   1              Trig = 0;       //关闭触发
+ 115   1              while (!Echo);  //测距过程中
+ 116   1              TR0 = 1;        //打开中断
+ 117   1              while (Echo);   //等待输出电平结束
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 17:07:20 PAGE 3   
+
+ 118   1              TR0 = 0;        //关闭中断
+ 119   1              count = (TH0 << 8) | TL0; //读取16位计时器里的数字
+ 120   1              dist = CYCLE * count * 0.017;   //0.034cm/us
+ 121   1              return dist;
+ 122   1      }
+ 123          
+ 124          //接收处理函数
+ 125          void ctrl()
+ 126          {
+ 127   1              switch (tmp)
+ 128   1              {
+ 129   2              //收到字符1，指示灯全亮
+ 130   2              case 1:
+ 131   2                      led1 = 0;
+ 132   2                      led2 = 0;
+ 133   2                      led3 = 0;
+ 134   2                      sendByte(tmp);
+ 135   2                      break;
+ 136   2      
+ 137   2              default:
+ 138   2                      led1 = 1;
+ 139   2                      led2 = 1;
+ 140   2                      led3 = 1;
+ 141   2                      sendByte(tmp);
+ 142   2                      break;
+ 143   2              }
+ 144   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    266    ----
+   CONSTANT SIZE    =     25    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      4      20
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

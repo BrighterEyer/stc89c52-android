@@ -1,0 +1,9 @@
+
+STC89C52单片机通过HC-06蓝牙模块与Android手机通信
+https://blog.csdn.net/itas109/article/details/8963383
+
+蓝牙默认密码
+1234
+
+Android 手机设备与HC05 蓝牙设备的通信（成功案例+源码）
+https://blog.csdn.net/H2677lucy/article/details/79613707

@@ -1,0 +1,3 @@
+
+分享一个51单片机直流电机调速源程序
+http://www.51hei.com/bbs/dpj-121342-1.html

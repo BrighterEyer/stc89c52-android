@@ -1,0 +1,180 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/17/2019  16:18:02  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+G:\KEIL\C51\BIN\BL51.EXE main.obj TO template RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  main.obj (MAIN)
+  G:\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+  G:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  template (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0003H     UNIT         ?DT?MAIN
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     07FDH                  *** GAP ***
+            CODE    0800H     008CH     UNIT         ?C_C51STARTUP
+            CODE    088CH     002CH     UNIT         ?PR?CTRL?MAIN
+            CODE    08B8H     0020H     UNIT         ?PR?INIT?MAIN
+            CODE    08D8H     001DH     UNIT         ?PR?_SEND?MAIN
+            CODE    08F5H     0010H     UNIT         ?PR?MAIN?MAIN
+            CODE    0905H     0005H     UNIT         ?C_INITSEG
+
+
+
+OVERLAY MAP OF MODULE:   template (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?MAIN
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN
+  +--> ?PR?INIT?MAIN
+  +--> ?PR?CTRL?MAIN
+
+?PR?CTRL?MAIN
+  +--> ?PR?_SEND?MAIN
+
+
+
+SYMBOL TABLE OF MODULE:  template (MAIN)
+
+  VALUE           TYPE          NAME
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/17/2019  16:18:02  PAGE 2
+
+
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00A8H         PUBLIC        IE
+  B:00A8H.4       PUBLIC        ES
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  C:08F5H         PUBLIC        main
+  C:08D8H         PUBLIC        _send
+  D:0099H         PUBLIC        SBUF
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  C:08B8H         PUBLIC        init
+  C:088CH         PUBLIC        ctrl
+  D:008DH         PUBLIC        TH1
+  D:008BH         PUBLIC        TL1
+  D:0008H         PUBLIC        tmp
+  B:0088H.6       PUBLIC        TR1
+  D:0009H         PUBLIC        c
+  B:00A0H.0       PUBLIC        led1
+  D:00C8H         PUBLIC        T2CON
+  B:00A0H.1       PUBLIC        led2
+  B:00A0H.2       PUBLIC        led3
+  B:00A0H.3       PUBLIC        led4
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  C:08F5H         LINE#         35
+  C:08F5H         LINE#         36
+  C:08F5H         LINE#         37
+  C:08F8H         LINE#         38
+  C:08F8H         LINE#         39
+  C:08F8H         LINE#         41
+  C:08FBH         LINE#         42
+  C:08FBH         LINE#         43
+  C:08FDH         LINE#         46
+  C:0900H         LINE#         47
+  C:0903H         LINE#         48
+  C:0903H         LINE#         49
+  -------         ENDPROC       MAIN
+  -------         PROC          INIT
+  C:08B8H         LINE#         53
+  C:08B8H         LINE#         54
+  C:08B8H         LINE#         56
+  C:08BAH         LINE#         57
+  C:08BDH         LINE#         59
+  C:08C0H         LINE#         60
+  C:08C6H         LINE#         62
+  C:08C9H         LINE#         63
+  C:08CBH         LINE#         65
+  C:08CDH         LINE#         66
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/17/2019  16:18:02  PAGE 3
+
+
+  C:08CFH         LINE#         69
+  C:08D1H         LINE#         72
+  C:08D3H         LINE#         73
+  C:08D5H         LINE#         74
+  C:08D7H         LINE#         75
+  -------         ENDPROC       INIT
+  -------         PROC          _SEND
+  D:0006H         SYMBOL        a
+  C:08D8H         LINE#         78
+  C:08D8H         LINE#         80
+  C:08DAH         LINE#         81
+  C:08DCH         LINE#         82
+  C:08DFH         LINE#         83
+  C:08E1H         LINE#         86
+  C:08E6H         LINE#         87
+  C:08EAH         LINE#         89
+  C:08ECH         LINE#         90
+  C:08F4H         LINE#         91
+  -------         ENDPROC       _SEND
+  -------         PROC          CTRL
+  C:088CH         LINE#         94
+  C:088CH         LINE#         95
+  C:088CH         LINE#         96
+  C:089CH         LINE#         97
+  C:089CH         LINE#         99
+  C:089CH         LINE#         100
+  C:089EH         LINE#         101
+  C:089EH         LINE#         102
+  C:08A0H         LINE#         105
+  C:08A0H         LINE#         106
+  C:08A2H         LINE#         107
+  C:08A2H         LINE#         108
+  C:08A4H         LINE#         111
+  C:08A4H         LINE#         112
+  C:08A6H         LINE#         113
+  C:08A6H         LINE#         114
+  C:08A8H         LINE#         117
+  C:08A8H         LINE#         118
+  C:08AAH         LINE#         119
+  C:08ACH         LINE#         120
+  C:08AEH         LINE#         121
+  C:08AEH         LINE#         122
+  C:08B0H         LINE#         124
+  C:08B0H         LINE#         125
+  C:08B7H         LINE#         126
+  C:08B7H         LINE#         127
+  C:08B7H         LINE#         128
+  -------         ENDPROC       CTRL
+  -------         ENDMOD        MAIN
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 007DH BYTE ( 6%) *
+******************************************************************************
+
+Program Size: data=12.0 xdata=0 code=269
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,208 @@
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 06:40:48 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: G:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #define TH0_TL0 (65536-1000)//设定中断的间隔时长
+   3          unsigned char count0 = 50;//低电平的占空比
+   4          unsigned char count1 = 0;//高电平的占空比
+   5          
+   6          bit Flag = 1;//电机正反转标志位,1正转，0反转
+   7          
+   8          sbit Key_add = P3 ^ 1; //电机减速
+   9          sbit Key_dec = P3 ^ 2; //电机加速
+  10          sbit Key_turn = P3 ^ 3; //电机换向
+  11          
+  12          sbit PWM1 = P2 ^ 6; //PWM 通道 1，反转脉冲
+  13          sbit PWM2 = P2 ^ 7; //PWM 通道 2，正转脉冲
+  14          
+  15          unsigned char Time_delay;
+  16          
+  17          /************函数声明**************/
+  18          void Delay(unsigned char x);
+  19          void Motor_speed_high(void);
+  20          void Motor_speed_low(void);
+  21          void Motor_turn(void);
+  22          void Timer0_init(void);
+  23          
+  24          /****************延时处理**********************/
+  25          void Delay(unsigned char x)
+  26          {
+  27   1              Time_delay = x;
+  28   1              while (Time_delay != 0); //等待中断，可减少PWM输出时间间隔
+  29   1      }
+  30          
+  31          /*******按键处理加pwm占空比，电机加速**********/
+  32          void Motor_speed_high(void)
+  33          {
+  34   1              if (Key_add == 0)
+  35   1              {
+  36   2                      Delay(10);
+  37   2                      if (Key_add == 0)
+  38   2                      {
+  39   3                              count0 += 5;
+  40   3      
+  41   3                              if (count0 >= 100)
+  42   3                              {
+  43   4                                      count0 = 100;
+  44   4                              }
+  45   3                      }
+  46   2                      while (!Key_add); //等待键松开
+  47   2              }
+  48   1      }
+  49          
+  50          /******按键处理减pwm占空比，电机减速*****/
+  51          void Motor_speed_low(void)
+  52          {
+  53   1              if (Key_dec == 0)
+  54   1              {
+  55   2                      Delay(10);
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 06:40:48 PAGE 2   
+
+  56   2                      if (Key_dec == 0)
+  57   2                      {
+  58   3                              count0 -= 5;
+  59   3      
+  60   3                              if (count0 <= 0)
+  61   3                              {
+  62   4                                      count0 = 0;
+  63   4                              }
+  64   3                      }
+  65   2                      while (!Key_dec );
+  66   2              }
+  67   1      }
+  68          
+  69          /************电机正反向控制**************/
+  70          void Motor_turn(void)
+  71          {
+  72   1              if (Key_turn == 0)
+  73   1              {
+  74   2                      Delay(10);
+  75   2                      if (Key_turn == 0)
+  76   2                      {
+  77   3                              Flag = ~Flag;
+  78   3                      }
+  79   2                      while (!Key_turn);
+  80   2              }
+  81   1      }
+  82          
+  83          /***********定时器0初始化***********/
+  84          void Timer0_init(void)
+  85          {
+  86   1              TMOD = 0x01; //定时器0工作于方式1
+  87   1              TH0 = TH0_TL0 / 256;
+  88   1              TL0 = TH0_TL0 % 256;
+  89   1              TR0 = 1;
+  90   1              ET0 = 1;
+  91   1              EA = 1;
+  92   1      }
+  93          
+  94          /*********主函数********************/
+  95          void main(void)
+  96          {
+  97   1              Timer0_init();
+  98   1      
+  99   1              while (1)
+ 100   1              {
+ 101   2                      Motor_turn();
+ 102   2                      Motor_speed_high();
+ 103   2                      Motor_speed_low();
+ 104   2              }
+ 105   1      }
+ 106          
+ 107          /**************定时0中断处理******************/
+ 108          void Timer0_int(void) interrupt 1 using 1
+ 109          {
+ 110   1              TR0 = 0;//设置定时器初值期间，关闭定时器
+ 111   1              TL0 = TH0_TL0 % 256;
+ 112   1              TH0 = TH0_TL0 / 256 ;//定时器装初值
+ 113   1              TR0 = 1;
+ 114   1      
+ 115   1              if (Time_delay != 0) //延时函数用
+ 116   1              {
+ 117   2                      Time_delay--;
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 06:40:48 PAGE 3   
+
+ 118   2              }
+ 119   1      
+ 120   1              if (Flag == 1) //电机正转
+ 121   1              {
+ 122   2                      PWM1 = 0;
+ 123   2      
+ 124   2                      if (++count1 < count0)
+ 125   2                      {
+ 126   3                              PWM2 = 1;
+ 127   3                      }
+ 128   2                      else
+ 129   2                              PWM2 = 0;
+ 130   2      
+ 131   2                      if (count1 >= 100)
+ 132   2                      {
+ 133   3                              count1 = 0;
+ 134   3                      }
+ 135   2              }
+ 136   1              else //电机反转
+ 137   1              {
+ 138   2                      PWM2 = 0;
+ 139   2      
+ 140   2                      if (++count1 < count0)
+ 141   2                      {
+ 142   3                              PWM1 = 1;
+ 143   3                      }
+ 144   2                      else
+ 145   2                              PWM1 = 0;
+ 146   2      
+ 147   2                      if (count1 >= 100)
+ 148   2                      {
+ 149   3                              count1 = 0;
+ 150   3                      }
+ 151   2              }
+ 152   1      }
+ 153          /************************************************
+ 154          
+ 155          void Delay(unsigned char x)
+ 156          {
+ 157          Time_delay = x;
+ 158          
+ 159          while(Time_delay != 0);//等待中断，可减少PWM输出时间间隔
+ 160          }
+ 161          
+ 162          Delay(10);
+ 163          
+ 164          if(Time_delay != 0)//延时函数用
+ 165          {
+ 166            Time_delay--;
+ 167          }
+ 168          
+ 169          其实这三个部分是相关联的。
+ 170          Delay（10）这是延时防抖的这是毫无疑问的，但这个消抖在消抖的同时将一开始只是声明了下的Time-
+ 171          
+ 172          delay赋值了，赋值还不算他还牵扯到定时器里去了。你看在赋值后Time-delay变成了10，看第二个部分
+ 173          
+ 174          的while（Time-delay！=10）；这个语句正如注释所说的等待中断，当等来了中断后你可以看第三个部
+ 175          
+ 176          分了，看见了吧终端中有将Time-delay减一，每中断一次就减一次直到等于0之后。也就是说延时的时长
+ 177          
+ 178          是十个中断的时长。注释中：可减少PWM输出时间间隔      也就可想而知了。
+ 179          *****************************************************/
+C51 COMPILER V9.00   MAIN                                                                  12/17/2019 06:40:48 PAGE 4   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    193    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

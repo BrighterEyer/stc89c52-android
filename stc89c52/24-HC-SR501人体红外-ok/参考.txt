@@ -1,0 +1,6 @@
+
+51单片机 人体红外感应报警
+https://blog.csdn.net/everestrs/article/details/86415607
+
+HC-SR501人体模块51示例代码
+https://blog.csdn.net/qq_43218290/article/details/87794812
